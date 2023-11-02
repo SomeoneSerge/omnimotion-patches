@@ -3,7 +3,7 @@ import torch
 from torch import masked_select, nn
 import torch.nn.functional as F
 from torch.utils.checkpoint import checkpoint
-import networks.pe_relu
+import omnimotion.networks.pe_relu
 
 
 class CouplingLayer(nn.Module):
@@ -155,7 +155,7 @@ class NVPSimplified(nn.Module):
 
         if self.affine:
             # this mlp takes time and depth as input and produce an affine transformation for x and y
-            self.affine_mlp = networks.pe_relu.MLP(input_dim=2,
+            self.affine_mlp = omnimotion.networks.pe_relu.MLP(input_dim=2,
                                                    hidden_size=256,
                                                    n_layers=2,
                                                    skip_layers=[],

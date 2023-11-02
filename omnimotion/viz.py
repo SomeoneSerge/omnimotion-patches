@@ -3,10 +3,10 @@ import imageio
 import glob
 import torch
 import numpy as np
-import util
+import omnimotion.util
 import subprocess
-from config import config_parser
-from trainer import BaseTrainer
+from omnimotion.config import config_parser
+from omnimotion.trainer import BaseTrainer
 import colorsys
 from matplotlib import cm
 import cv2

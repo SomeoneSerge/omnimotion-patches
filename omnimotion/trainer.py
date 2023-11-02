@@ -10,10 +10,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import util
-from criterion import masked_mse_loss, masked_l1_loss, compute_depth_range_loss, lossfun_distortion
-from networks.mfn import GaborNet
-from networks.nvp_simplified import NVPSimplified
+import omnimotion.util
+from omnimotion.criterion import masked_mse_loss, masked_l1_loss, compute_depth_range_loss, lossfun_distortion
+from omnimotion.networks.mfn import GaborNet
+from omnimotion.networks.nvp_simplified import NVPSimplified
 from kornia import morphology as morph
 
 
@@ -122,7 +122,7 @@ class BaseTrainer():
         else:
             self.masks = torch.ones(self.images.shape[:-1]).to(self.device) > 0.
             self.with_mask = False
-        self.grid = util.gen_grid(self.h, self.w, device=self.device, normalize=False, homogeneous=True).float()
+        self.grid = omnimotion.util.gen_grid(self.h, self.w, device=self.device, normalize=False, homogeneous=True).float()
 
     def project(self, x, return_depth=False):
         '''
@@ -132,7 +132,7 @@ class BaseTrainer():
         :return: pixel_coords in image space [..., 2], depth [..., 1]
         '''
         pixel_coords, depth = torch.split(x, dim=-1, split_size_or_sections=[2, 1])
-        pixel_coords = util.denormalize_coords(pixel_coords, self.h, self.w)
+        pixel_coords = omnimotion.util.denormalize_coords(pixel_coords, self.h, self.w)
         if return_depth:
             return pixel_coords, depth
         else:
@@ -147,7 +147,7 @@ class BaseTrainer():
         '''
         assert pixels.shape[-1] in [2, 3]
         assert pixels.ndim == depths.ndim
-        pixels = util.normalize_coords(pixels[..., :2], self.h, self.w)
+        pixels = omnimotion.util.normalize_coords(pixels[..., :2], self.h, self.w)
         return torch.cat([pixels, depths], dim=-1)
 
     def get_in_range_mask(self, x, max_padding=0):
@@ -255,7 +255,7 @@ class BaseTrainer():
         '''
         color, density = self.get_canonical_color_and_density(x_canonical)
 
-        alpha = util.sigma2alpha(density)  # [n_imgs, n_pts, n_samples]
+        alpha = omnimotion.util.sigma2alpha(density)  # [n_imgs, n_pts, n_samples]
 
         # mask out the nearest 20% of samples. This trick may be helpful to avoid one local minimum solution
         # where surfaces that are not nearest to the camera are initialized at nearest depth planes
@@ -598,7 +598,7 @@ class BaseTrainer():
             rand_inds = rng.choice(len(coords_valid), num_pts, replace=(num_pts > len(coords_valid)))
             coords = coords_valid[rand_inds]
 
-        coords_normed = util.normalize_coords(coords, self.h, self.w)
+        coords_normed = omnimotion.util.normalize_coords(coords, self.h, self.w)
         if return_normed:
             return coords, coords_normed
         else:
@@ -618,7 +618,7 @@ class BaseTrainer():
         uvws = []
         for i in range(self.num_imgs):
             pixels_normed = 2 * torch.rand(num_pts_per_frame, 2, device=self.device) - 1.
-            pixels = util.denormalize_coords(pixels_normed, self.h, self.w)[None]
+            pixels = omnimotion.util.denormalize_coords(pixels_normed, self.h, self.w)[None]
             pixel_samples = self.sample_3d_pts_for_pixels(pixels, det=False)
             with torch.no_grad():
                 uvw = self.get_prediction_one_way(pixel_samples, [i])[0]
@@ -644,7 +644,7 @@ class BaseTrainer():
         for chunk in torch.split(uvw, chunk_size, dim=0):
             with torch.no_grad():
                 color, density = self.get_canonical_color_and_density(chunk, apply_contraction=apply_contraction)
-            alpha = util.sigma2alpha(density)
+            alpha = omnimotion.util.sigma2alpha(density)
             rgba = torch.cat([color, alpha[..., None]], dim=-1)
             rgbas.append(rgba.cpu().numpy())
         rgbas = np.concatenate(rgbas, axis=0)
@@ -676,10 +676,10 @@ class BaseTrainer():
         img1 = self.images[id1].cpu().numpy()
         img2 = self.images[id2].cpu().numpy()
         mask = mask[0].squeeze(-1).cpu().numpy()
-        out = util.drawMatches(img1, img2, kp1, kp2, num_vis=num_pts, mask=mask)
+        out = omnimotion.util.drawMatches(img1, img2, kp1, kp2, num_vis=num_pts, mask=mask)
         out = cv2.putText(out, str(id2 - id1), org=(30, 50), fontScale=1, color=(255, 255, 255),
                           fontFace=cv2.FONT_HERSHEY_SIMPLEX, thickness=2)
-        out = util.uint82float(out)
+        out = omnimotion.util.uint82float(out)
         return out
 
     def plot_correspondences_for_pixels(self, query_kpt, query_id, num_pts=200,
@@ -715,7 +715,7 @@ class BaseTrainer():
                                                                    use_max_loc=use_max_loc)[0]
                     mask = None
                 img_i = self.images[id].cpu().numpy()
-                out = util.drawMatches(img_query, img_i, query_kpt.cpu().numpy(), kp_i.cpu().numpy(),
+                out = omnimotion.util.drawMatches(img_query, img_i, query_kpt.cpu().numpy(), kp_i.cpu().numpy(),
                                        num_vis=num_pts, mask=mask, radius=radius)
                 frames.append(out)
                 kpts.append(kp_i)
@@ -826,7 +826,7 @@ class BaseTrainer():
             flow_map = (flow_map - self.grid[..., :2]).cpu().numpy()
             flows.append(flow_map)
         flows = np.stack(flows, axis=0)
-        flow_imgs = util.flow_to_image(flows)
+        flow_imgs = omnimotion.util.flow_to_image(flows)
         if return_original:
             return flow_imgs, flows
         else:
@@ -849,7 +849,7 @@ class BaseTrainer():
             flow_map = flow_map.cpu().numpy()
             flows.append(flow_map)
         flows = np.stack(flows, axis=0)
-        flow_imgs = util.flow_to_image(flows[..., :2])
+        flow_imgs = omnimotion.util.flow_to_image(flows[..., :2])
         if return_original:
             return flow_imgs, flows
         else:
@@ -871,7 +871,7 @@ class BaseTrainer():
         if colorize:
             depths_vis_color = []
             for depth_vis in depths_vis:
-                depth_vis_color = util.colorize_np(depth_vis, range=(0, 1))
+                depth_vis_color = omnimotion.util.colorize_np(depth_vis, range=(0, 1))
                 depths_vis_color.append(depth_vis_color)
             depths_vis_color = np.stack(depths_vis_color, axis=0)
         else:
@@ -920,7 +920,7 @@ class BaseTrainer():
                 min_depth = pred_depths_cat.min().item()
                 max_depth = pred_depths_cat.max().item()
 
-                pred_depths_vis = util.colorize(pred_depths_cat, range=(min_depth, max_depth), append_cbar=True)
+                pred_depths_vis = omnimotion.util.colorize(pred_depths_cat, range=(min_depth, max_depth), append_cbar=True)
                 pred_depths_vis = F.interpolate(pred_depths_vis.permute(2, 0, 1)[None], scale_factor=0.5, mode='area')
                 writer.add_image('depth', pred_depths_vis, step, dataformats='NCHW')
 
@@ -932,7 +932,7 @@ class BaseTrainer():
 
                 # write weight statistics, first row: sum, second row: max
                 weights_stats = weights_stats.permute(3, 1, 0, 2).reshape(len(ids) * self.h, -1)
-                weights_stats_vis = util.colorize(weights_stats, range=(0, 1), append_cbar=True)
+                weights_stats_vis = omnimotion.util.colorize(weights_stats, range=(0, 1), append_cbar=True)
                 weights_stats_vis = F.interpolate(weights_stats_vis.permute(2, 0, 1)[None], scale_factor=0.5,
                                                   mode='area')
                 writer.add_image('weight_stats', weights_stats_vis, step, dataformats='NCHW')

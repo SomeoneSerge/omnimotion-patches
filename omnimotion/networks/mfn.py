@@ -3,8 +3,10 @@ from torch import nn
 import torch.nn.functional as F
 import numpy as np
 import sys
-sys.path.append('../')
-from util import sigma2alpha
+from omnimotion.util import sigma2alpha
+
+
+
 
 
 class MFNBase(nn.Module):

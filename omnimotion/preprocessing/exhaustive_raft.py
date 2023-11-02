@@ -5,7 +5,7 @@ for each pair, we use previous flow as initialization to compute the current flo
 
 import sys
 
-sys.path.append('core')
+
 
 import argparse
 import os
@@ -15,8 +15,8 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 
-from raft import RAFT
-from utils.utils import InputPadder
+from raft.core.raft import RAFT
+from raft.core.utils.utils import InputPadder
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -95,7 +95,7 @@ def run_exhaustive_flow(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='models/raft-things.pth', help="restore checkpoint")
+    parser.add_argument('--model', help="restore checkpoint")
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
     parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')

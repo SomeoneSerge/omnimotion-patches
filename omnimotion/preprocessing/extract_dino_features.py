@@ -74,7 +74,7 @@ def color_normalize(x, mean=[0.485, 0.456, 0.406], std=[0.228, 0.224, 0.225]):
     return x
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser('Evaluation with video object segmentation on DAVIS 2017')
     parser.add_argument('--pretrained_weights', default='.',
                         type=str, help="Path to pretrained weights to evaluate.")
@@ -122,3 +122,7 @@ if __name__ == '__main__':
         np.save(os.path.join(save_dir, frame_name + '.npy'), frame_feat)
 
     print('computing dino features for {} is done \n'.format(scene_dir))
+
+
+if __name__ == '__main__':
+    main()

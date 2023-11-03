@@ -72,7 +72,7 @@ def vis_trail(scene_dir, kpts_foreground, kpts_background, save_path):
     imageio.mimwrite(save_path, frames, quality=8, fps=10)
 
 
-if __name__ == '__main__':
+def main()
     args = config_parser()
     seq_name = os.path.basename(args.data_dir.rstrip('/'))
 
@@ -132,5 +132,5 @@ if __name__ == '__main__':
                          frames, quality=8, fps=10)
 
 
-
-
+if __name__ == '__main__':
+    main()

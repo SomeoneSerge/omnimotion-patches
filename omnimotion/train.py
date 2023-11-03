@@ -94,7 +94,7 @@ def train(args):
             data_sampler.set_epoch(epoch)
 
 
-if __name__ == '__main__':
+def main():
     args = config_parser()
 
     if args.distributed:
@@ -104,3 +104,6 @@ if __name__ == '__main__':
 
     train(args)
 
+
+if __name__ == '__main__':
+    main()

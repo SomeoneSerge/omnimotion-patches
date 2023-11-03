@@ -93,7 +93,7 @@ def run_exhaustive_flow(args):
         print('computing all pairwise optical flows for {} is done \n'.format(data_dir))
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', help="restore checkpoint")
     parser.add_argument('--small', action='store_true', help='use small model')
@@ -105,3 +105,5 @@ if __name__ == '__main__':
     run_exhaustive_flow(args)
 
 
+if __name__ == '__main__':
+    main()

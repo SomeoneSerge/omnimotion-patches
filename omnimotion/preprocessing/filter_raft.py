@@ -116,10 +116,14 @@ def run_filtering(args):
     print('filtering raft optical flow for {} is done\n'.format(scene_dir))
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default='', help='dataset dir')
     parser.add_argument('--cycle_th', type=float, default=3., help='threshold for cycle consistency error')
     args = parser.parse_args()
 
     run_filtering(args)
+
+
+if __name__ == '__main__':
+    main()

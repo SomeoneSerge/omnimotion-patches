@@ -237,10 +237,14 @@ def run(args):
     print('chaining raft optical flow for {} is done'.format(scene_dir))
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default='', help='dataset dir')
 
     args = parser.parse_args()
 
     run(args)
+
+
+if __name__ == '__main__':
+    main()

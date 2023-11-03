@@ -4,7 +4,7 @@ import sys
 import subprocess
 import argparse
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, required=True, help='dataset dir')
     parser.add_argument('--model', default='models/raft-things.pth', help="restore checkpoint")
@@ -29,3 +29,5 @@ if __name__ == '__main__':
     subprocess.run(['python', 'chain_raft.py', '--data_dir', args.data_dir])
 
 
+if __name__ == '__main__':
+    main()
